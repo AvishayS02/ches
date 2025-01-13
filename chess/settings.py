@@ -11,23 +11,20 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
-from dotenv import load_dotenv
-from decouple import config
-# Load environment variables from the .env file
-import os
 import environ
+import os
 
-load_dotenv()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Read the .env file
 
-SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG', default=True)
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env.bool('DEBUG', default=True)  
+ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 
 
 

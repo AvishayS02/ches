@@ -4,11 +4,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from users.models import User
 from users.serializers import UserSerializer, LoginSerializer
 from django.contrib.auth import authenticate 
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAuthenticated
-from django.urls import reverse
+from rest_framework import viewsets
 from django.shortcuts import redirect, render
 
 logger = logging.getLogger(__name__)
@@ -62,12 +63,36 @@ def get_register(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  # Only authenticated users can access their profile
 def get_profile(request):
-    # Get the user making the request
-    user = request.user
-    # Return user information (you can customize what information you want to return)
-    return Response({
+    user = request.user  # Get the logged-in user
+    logger.info(f"Authenticated user: {user.username}")  # Log authenticated user
+    user_data = {
         'username': user.username,
         'email': user.email,
-        'date_joined': user.date_joined,
-        'last_login': user.last_login })
+        'score': user.score,
+        'wins': user.wins,
+        'losses': user.losses,
+        'draws': user.draws,
+        'joined_date': user.date_joined,
+    }
+    return Response(user_data)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_leaderboard(request):
+    # Get users sorted by their Elo rating or score
+    users = User.objects.all().order_by('-score')[:4]  # Adjust the number (e.g., top 10)
+    
+    # Prepare the response data
+    leaderboard_data = [{
+        'username': user.username,
+        'score': user.score,
+        'email': user.email,
+    } for user in users]
+    
+    return Response({'leaderboard': leaderboard_data})
+    
+    
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer    
+    
     

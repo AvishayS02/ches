@@ -2,13 +2,6 @@ from django.db import models
 from users.models import User
 
 
-class Bot(models.Model):
-    name = models.CharField(max_length=100)
-    difficulty = models.CharField(max_length=50, choices=[('Easy', 'Easy'), ('Medium', 'Medium'), ('Hard', 'Hard')], default='Easy')
-
-    def __str__(self):
-        return f"{self.name} ({self.difficulty} Bot)"
-
 
 class Game(models.Model):
     RESULT_CHOICES = [

@@ -11,6 +11,7 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Refresh the access token
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),    # Verify the access token
-    path('profile/', views.get_profile, name='profile')
+    path('profile/', views.get_profile, name='profile'),
+    path('leaderboard/', views.get_leaderboard, name='leaderboard'),
 ]
 

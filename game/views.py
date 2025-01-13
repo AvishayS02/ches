@@ -23,15 +23,13 @@ def start_game(request):
 
     return Response({'game_id': game.id, 'white_player': game.white_player.username, 'black_player': game.black_player.username}, status=status.HTTP_201_CREATED)
 
-# Get a list of all users (excluding the logged-in user)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def show_opponents(request):
     user = request.user
-    opponents = User.objects.exclude(id=user.id)  # Exclude the logged-in user from the list
-    opponent_list = [{'id': opponent.id, 'username': opponent.username} for opponent in opponents]
+    users = User.objects.exclude(id=user.id)  # Exclude logged-in user
+    opponent_list = [{'id': user.id, 'username': user.username} for user in users]
     return Response(opponent_list, status=status.HTTP_200_OK)
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_score(request, game_id):
@@ -50,22 +48,51 @@ def submit_score(request, game_id):
 
     # Update player scores
     if result == 'White':
-        game.white_player.score += 1
-        game.white_player.save()
+        game.white_player.score += 10  # Award 10 points for a win
+        game.white_player.wins += 1
+        game.black_player.score -= 10  # Deduct 10 points for a loss
+        game.black_player.losses += 1
     elif result == 'Black':
-        game.black_player.score += 1
-        game.black_player.save()
+        game.black_player.score += 10  # Award 10 points for a win
+        game.black_player.wins += 1
+        game.white_player.score -= 10  # Deduct 10 points for a loss
+        game.white_player.losses += 1
+    elif result == 'Draw':
+        game.white_player.score += 5  # Award 5 points for a draw
+        game.black_player.score += 5  # Award 5 points for a draw
+        game.white_player.draws += 1
+        game.black_player.draws += 1
+
+    # Save updated score and record the results
+    game.white_player.save()
+    game.black_player.save()
 
     return Response({'msg': 'Game result and scores updated'}, status=status.HTTP_200_OK)
+
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from .models import Game
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def game_history(request):
-    games = Game.objects.filter(player1=request.user) | Game.objects.filter(player2=request.user)
+    # Get all games where the current user is either the white or black player
+    games_as_white = Game.objects.filter(white_player=request.user)
+    games_as_black = Game.objects.filter(black_player=request.user)
+    
+    # Combine both querysets
+    games = games_as_white | games_as_black
+    
+    # Create the game list to return
     game_list = [{
-        "white_player": game.player1.username,
-        "black_player": game.player2.username,
+        "opponent": game.black_player.username if game.white_player == request.user else game.white_player.username,
         "result": game.result,
-        "date": game.created_at
+        "date": game.created_at,
+        "color_played": "White" if game.white_player == request.user else "Black",
+        "white_player": game.white_player.username,  # Add white player info
+        "black_player": game.black_player.username,  # Add black player info
+        "game_date": game.created_at.strftime("%d/%m/%Y")  # Formatted game date
     } for game in games]
+    
     return Response({"games": game_list})

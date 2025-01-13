@@ -7,7 +7,7 @@ class User(AbstractUser):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     draws = models.IntegerField(default=0)
-    elo = models.IntegerField(default=1200)
+    score = models.IntegerField(default=1200)
 # Create your models here.
 
 def __str__(self):

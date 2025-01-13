@@ -15,10 +15,10 @@ from dotenv import load_dotenv
 from decouple import config
 # Load environment variables from the .env file
 import os
-
+import environ
 
 load_dotenv()
-
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -91,10 +91,7 @@ WSGI_APPLICATION = 'chess.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(),  # This will automatically use the 'DATABASE_URL' in the .env file, if defined
 }
 
 
@@ -138,7 +135,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 JWT_AUTH = {
-    'JWT_ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'JWT_ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
     'JWT_REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     

@@ -4,8 +4,7 @@ from django.contrib.auth import get_user_model , authenticate
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    # The `password` field is write-only, meaning it will not appear in the response
-    # but will be required when creating a new user.
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
     class Meta:
         model = User
         fields = ['username', 'email', 'password']

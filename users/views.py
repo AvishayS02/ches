@@ -65,6 +65,8 @@ def get_register(request):
 def get_profile(request):
     user = request.user  # Get the logged-in user
     logger.info(f"Authenticated user: {user.username}")  # Log authenticated user
+    # Format the `date_joined` as YYYY-MM-DD
+    joined_date = user.date_joined.strftime('%Y-%m-%d')
     user_data = {
         'username': user.username,
         'email': user.email,

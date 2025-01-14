@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'password', 'date_joined']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -26,6 +26,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+    
+def validate(self, attrs):
+        # Check that passwords match
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("Passwords must match.")
+        return attrs
+    
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255)

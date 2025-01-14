@@ -10,8 +10,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
-from django.shortcuts import redirect, render
-
+from django.shortcuts import render
+from django.core.exceptions import ValidationError
 logger = logging.getLogger(__name__)
 # Login view
 @api_view(['POST'])
@@ -52,11 +52,15 @@ def get_register(request):
 
     # Validate the incoming data
     if serializer.is_valid():
-        # Save the new user to the database
-        serializer.save()
+        try:
+            # Save the new user to the database
+            serializer.save()
 
-        # Return a success response
-        return Response({'detail': 'Registration successful'}, status=status.HTTP_201_CREATED)
+            # Return a success response with a more descriptive message
+            return Response({'detail': 'Registration successful', 'username': serializer.data['username']}, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # If the data is invalid, return an error response
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

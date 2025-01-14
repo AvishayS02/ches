@@ -69,10 +69,6 @@ def submit_score(request, game_id):
 
     return Response({'msg': 'Game result and scores updated'}, status=status.HTTP_200_OK)
 
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from .models import Game
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

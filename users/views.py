@@ -85,7 +85,7 @@ def get_profile(request):
 @permission_classes([IsAuthenticated])
 def get_leaderboard(request):
     # Get users sorted by their Elo rating or score
-    users = User.objects.all().order_by('-score')[:4]  # Adjust the number (e.g., top 10)
+    users = User.objects.all().order_by('-score')[:10]  # Adjust the number (e.g., top 10)
     
     # Prepare the response data
     leaderboard_data = [{
